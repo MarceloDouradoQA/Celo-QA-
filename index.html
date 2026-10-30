@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MineCrafting - Tutorial Hub</title>
+  <style>
+    :root {
+      --green: #5b8731;
+      --green-l: #78b043;
+      --wood: #8f5635;
+      --stone: #4a4a4a;
+      --bg: #14161a;
+      --panel: #1f2328;
+      --text: #e8e8e8;
+      --muted: #a0a4aa;
+      color-scheme: dark;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      line-height: 1.5;
+    }
+    header {
+      background: linear-gradient(180deg, var(--green) 0 14px, var(--wood) 14px);
+      padding: 28px 20px;
+      text-align: center;
+      border-bottom: 4px solid #000;
+    }
+    header p { margin: 6px 0 0; color: #f3e9dc; }
+    .language-selector { margin-top: 12px; display: flex; justify-content: center; }
+    .language-selector select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--text);
+      border: 2px solid var(--stone);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .language-selector select:focus { outline: none; border-color: var(--green-l); }
+    main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
+    #search {
+      flex: 1 1 240px;
+      padding: 11px 14px;
+      background: var(--panel);
+      color: var(--text);
+      border: 2px solid var(--stone);
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    #search:focus { outline: none; border-color: var(--green-l); }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filters button {
+      background: var(--stone);
+      color: var(--text);
+      border: 2px solid #000;
+      border-radius: 6px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .filters button:hover { background: #5c5c5c; }
+    .filters button.active { background: var(--green); border-color: var(--green-l); }
+    #count { color: var(--muted); margin: 4px 0 14px; font-size: .9rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+    .card {
+      background: var(--panel);
+      border: 2px solid var(--stone);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform .15s, border-color .15s;
+    }
+    .card:hover { transform: translateY(-4px); border-color: var(--green-l); }
+    .thumb {
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.6rem;
+      image-rendering: pixelated;
+      background-size: 24px 24px;
+    }
+    .card-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .card h3 { margin: 0; font-size: 1.1rem; }
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag { font-size: .75rem; padding: 3px 8px; border-radius: 4px; background: var(--stone); font-weight: 600; }
+    
+    .diff-facil, .diff-easy, .diff-facile { background: #3d7a28; }
+    .diff-medio, .diff-medium, .diff-moyen { background: #a8741a; }
+    .diff-avancado, .diff-advanced, .diff-avanzado, .diff-avance { background: #9b2b2b; }
+
+    .card p { margin: 0; color: var(--muted); font-size: .9rem; flex: 1; }
+    .src { color: var(--green-l); font-size: .8rem; text-decoration: none; }
+    .src:hover { text-decoration: underline; }
+    .btn {
+      background: var(--green);
+      color: #fff;
+      border: 2px solid #000;
+      border-bottom-width: 4px;
+      border-radius: 6px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: .95rem;
+    }
+    .btn:hover:not(:disabled) { background: var(--green-l); }
+    .btn:disabled { background: var(--stone); color: #888; cursor: not-allowed; }
+    .btn.wood { background: var(--wood); }
+    .btn.wood:hover:not(:disabled) { background: #a96a45; }
+    #empty { text-align: center; padding: 40px; color: var(--muted); border: 2px dashed var(--stone); border-radius: 8px; }
+    .overlay { position: fixed; inset: 0; background: #000b; display: none; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+    .overlay.open { display: flex; }
+    .modal {
+      background: var(--panel);
+      border: 3px solid var(--green);
+      border-radius: 10px;
+      width: 100%;
+      max-width: 640px;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 20px;
+      position: relative;
+    }
+    .modal h2 { margin: 0 36px 6px 0; }
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: var(--wood);
+      color: #fff;
+      border: 2px solid #000;
+      border-radius: 6px;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .modal h4 { margin: 18px 0 8px; color: var(--green-l); }
+    .mats { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+    .mats label { display: flex; gap: 10px; align-items: center; background: var(--bg); padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+    .mats input { width: 18px; height: 18px; accent-color: var(--green); }
+    .mats input:checked + span { text-decoration: line-through; color: var(--muted); }
+    .bar { height: 8px; background: var(--stone); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+    .bar > div { height: 100%; background: var(--green-l); width: 0; transition: width .2s; }
+    .step-box { background: var(--bg); border-left: 5px solid var(--wood); padding: 14px; border-radius: 6px; min-height: 80px; }
+    .step-nav { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 12px; }
+    #step-counter { color: var(--muted); font-weight: 600; }
+  </style>
+</head>
+<body>
+<header>
+  <h1 id="app-title" data-cy="app-title">⛏️ MineCrafting - Tutorial Hub</h1>
+  <p id="app-subtitle" data-cy="app-subtitle">Tutoriais e blueprints de construções de Minecraft, com lista de materiais e passo a passo para o seu Survival.</p>
+  <div class="language-selector">
+    <select id="languageSelect" onchange="mudarIdioma(this.value)" aria-label="Selecionar Idioma">
+      <option value="pt" selected>🇧🇷 Português</option>
+      <option value="en">🇺🇸 English</option>
+      <option value="es">🇪🇸 Español</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="it">🇮🇹 Italiano</option>
+    </select>
+  </div>
+</header>
+<main>
+  <div class="controls">
+    <input id="search" data-cy="search-input" type="search" placeholder="Buscar tutorial por palavra-chave..." aria-label="Buscar tutorial">
+    <div class="filters" id="filters-container" data-cy="filter-group"></div>
+  </div>
+  <div id="count" data-cy="results-count"></div>
+  <div class="grid" id="grid" data-cy="tutorial-grid"></div>
+  <div id="empty" data-cy="empty-state" hidden>Nenhum tutorial encontrado. Tente outra palavra ou categoria. 🔍</div>
+</main>
+
+<div class="overlay" id="overlay" data-cy="modal-overlay">
+  <div class="modal" id="modal" data-cy="tutorial-modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
+    <button class="close" data-cy="btn-close-modal" id="btn-close" aria-label="Fechar">✕</button>
+    <h2 id="m-title" data-cy="modal-title"></h2>
+    <div class="tags" id="m-tags"></div>
+    <a class="src" id="m-src" data-cy="modal-source" target="_blank" rel="noopener noreferrer"></a>
+    <h4 id="mats-title">🎒 Materiais necessários</h4>
+    <ul class="mats" id="mats" data-cy="materials-list"></ul>
+    <div class="bar"><div id="bar" data-cy="materials-progress"></div></div>
+    <div id="mat-status" data-cy="materials-status" style="font-size:.85rem;color:var(--muted);margin-top:4px"></div>
+    <h4 id="steps-title">📋 Passo a passo</h4>
+    <div class="step-box" id="step-text" data-cy="step-text"></div>
+    <div class="step-nav">
+      <button class="btn wood" id="btn-prev" data-cy="btn-prev-step">← Anterior</button>
+      <span id="step-counter" data-cy="step-counter"></span>
+      <button class="btn" id="btn-next" data-cy="btn-next-step">Próximo →</button>
+    </div>
+  </div>
+</div>
+
+<script src="translations.js"></script>
+
+<script>
+  let lang = "pt";
+  const state = { cat: "Todos", q: "", tutId: null, step: 0, checks: {} };
+
+  const $ = s => document.querySelector(s);
+  const norm = t => (t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const diffClass = d => "diff-" + norm(d);
+
+  function getTranslationObj() {
+    return (typeof TRANSLATIONS !== "undefined" && TRANSLATIONS[lang]) ? TRANSLATIONS[lang] : TRANSLATIONS["pt"];
+  }
+
+  function mudarIdioma(novoIdioma) {
+    lang = novoIdioma;
+    const tObj = getTranslationObj();
+    
+    $("#app-title").textContent = tObj.appTitle;
+    $("#app-subtitle").textContent = tObj.appSubtitle;
+    $("#search").placeholder = tObj.searchPlaceholder;
+    $("#empty").textContent = tObj.emptyState;
+    $("#mats-title").textContent = tObj.materialsTitle;
+    $("#steps-title").textContent = tObj.stepsTitle;
+    $("#btn-prev").textContent = tObj.prevBtn;
+    $("#btn-next").textContent = tObj.nextBtn;
+
+    renderFilters();
+    renderGrid();
+
+    if (state.tutId) {
+      openModal(state.tutId, false);
+    }
+  }
+
+  function renderFilters() {
+    const tObj = getTranslationObj();
+    const categories = ["Todos", "Casas/Vilas", "Castelos/Medievais", "Redstone/Fazendas"];
+    
+    $("#filters-container").innerHTML = categories.map(catKey => {
+      const label = tObj.categories[catKey] || catKey;
+      const isActive = state.cat === catKey ? "active" : "";
+      return `<button class="${isActive}" data-cy="filter-category" data-category="${catKey}">${label}</button>`;
+    }).join("");
+
+    document.querySelectorAll("[data-cy=filter-category]").forEach(b => {
+      b.addEventListener("click", () => {
+        state.cat = b.dataset.category;
+        document.querySelectorAll("[data-cy=filter-category]").forEach(x => x.classList.toggle("active", x === b));
+        renderGrid();
+      });
+    });
+  }
+
+  function renderGrid() {
+    const tObj = getTranslationObj();
+    const tutoriais = tObj.tutoriais;
+    const q = norm(state.q.trim());
+
+    const list = tutoriais.filter(t => 
+      (state.cat === "Todos" || t.cat === state.cat) &&
+      (!q || norm(t.titulo + " " + t.cat + " " + t.dif + " " + t.desc).includes(q))
+    );
+
+    $("#grid").innerHTML = list.map(t => {
+      const catLabel = tObj.categories[t.cat] || t.cat;
+      return `
+      <article class="card" data-cy="card-tutorial" data-id="${t.id}">
+        <div class="thumb" data-cy="card-image" style="background-color:${t.cor};background-image:linear-gradient(45deg,#0002 25%,transparent 25% 75%,#0002 75%)">${t.emoji}</div>
+        <div class="card-body">
+          <h3 data-cy="card-title">${t.titulo}</h3>
+          <div class="tags">
+            <span class="tag" data-cy="card-category">${catLabel}</span>
+            <span class="tag ${diffClass(t.dif)}" data-cy="card-difficulty">${t.dif}</span>
+          </div>
+          <p>${t.desc}</p>
+          <a class="src" data-cy="card-source" href="${t.url}" target="_blank" rel="noopener noreferrer">${tObj.sourceLabel} ${t.fonte} ↗</a>
+          <button class="btn" data-cy="btn-view-steps" data-id="${t.id}">${tObj.viewStepsBtn}</button>
+        </div>
+      </article>`;
+    }).join("");
+
+    $("#empty").hidden = list.length > 0;
+    $("#count").textContent = typeof tObj.resultsCount === "function" ? tObj.resultsCount(list.length) : `${list.length} tutoriais`;
+  }
+
+  function renderMaterials(tut) {
+    const tObj = getTranslationObj();
+    const c = state.checks[tut.id] || [];
+
+    $("#mats").innerHTML = tut.mats.map((m, i) => `
+      <li>
+        <label>
+          <input type="checkbox" data-cy="material-checkbox" data-idx="${i}" ${c[i] ? "checked" : ""}>
+          <span>${m}</span>
+        </label>
+      </li>
+    `).join("");
+
+    const n = c.filter(Boolean).length;
+    $("#bar").style.width = (n / tut.mats.length * 100) + "%";
+    $("#mat-status").textContent = typeof tObj.materialsStatus === "function" ? tObj.materialsStatus(n, tut.mats.length) : `${n} de ${tut.mats.length}`;
+  }
+
+  function renderStep(tut) {
+    const tObj = getTranslationObj();
+    const total = tut.passos.length;
+
+    $("#step-text").textContent = (state.step + 1) + ". " + tut.passos[state.step];
+    $("#step-counter").textContent = typeof tObj.stepCounter === "function" ? tObj.stepCounter(state.step + 1, total) : `Passo ${state.step + 1} de ${total}`;
+    $("#btn-prev").disabled = state.step === 0;
+    $("#btn-next").disabled = state.step === total - 1;
+  }
+
+  function openModal(id, resetStep = true) {
+    const tObj = getTranslationObj();
+    const tut = tObj.tutoriais.find(x => x.id === id);
+    if (!tut) return;
+
+    state.tutId = id;
+    if (resetStep) state.step = 0;
+    if (!state.checks[id]) state.checks[id] = tut.mats.map(() => false);
+
+    const catLabel = tObj.categories[tut.cat] || tut.cat;
+
+    $("#m-title").textContent = tut.emoji + " " + tut.titulo;
+    $("#m-tags").innerHTML = `<span class="tag">${catLabel}</span><span class="tag ${diffClass(tut.dif)}">${tut.dif}</span>`;
+    $("#m-src").href = tut.url;
+    $("#m-src").textContent = tObj.originalTutorialLink + tut.fonte + " ↗";
+
+    renderMaterials(tut);
+    renderStep(tut);
+    $("#overlay").classList.add("open");
+  }
+
+  function closeModal() {
+    state.tutId = null;
+    $("#overlay").classList.remove("open");
+  }
+
+  $("#search").addEventListener("input", e => {
+    state.q = e.target.value;
+    renderGrid();
+  });
+
+  $("#grid").addEventListener("click", e => {
+    const b = e.target.closest("[data-cy=btn-view-steps]");
+    if (b) openModal(+b.dataset.id);
+  });
+
+  $("#mats").addEventListener("change", e => {
+    if (e.target.matches("[data-cy=material-checkbox]")) {
+      const idx = +e.target.dataset.idx;
+      if (state.tutId && state.checks[state.tutId]) {
+        state.checks[state.tutId][idx] = e.target.checked;
+        const tObj = getTranslationObj();
+        const tut = tObj.tutoriais.find(x => x.id === state.tutId);
+        if (tut) renderMaterials(tut);
+      }
+    }
+  });
+
+  $("#btn-next").addEventListener("click", () => {
+    const tObj = getTranslationObj();
+    const tut = tObj.tutoriais.find(x => x.id === state.tutId);
+    if (tut && state.step < tut.passos.length - 1) {
+      state.step++;
+      renderStep(tut);
+    }
+  });
+
+  $("#btn-prev").addEventListener("click", () => {
+    const tObj = getTranslationObj();
+    const tut = tObj.tutoriais.find(x => x.id === state.tutId);
+    if (tut && state.step > 0) {
+      state.step--;
+      renderStep(tut);
+    }
+  });
+
+  $("#btn-close").addEventListener("click", closeModal);
+  $("#overlay").addEventListener("click", e => { if (e.target.id === "overlay") closeModal(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+  mudarIdioma("pt");
+</script>
+</body>
+</html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MineCrafting - Tutorial Hub</title>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MineCrafting - Tutorial Hub</title>
+<style>
+    :root {
+      --green: #5b8731;
+      --green-l: #78b043;
+      --wood: #8f5635;
+      --stone: #4a4a4a;
+      --bg: #14161a;
+      --panel: #1f2328;
+      --text: #e8e8e8;
+      --muted: #a0a4aa;
+      color-scheme: dark;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      line-height: 1.5;
+    }
+    header {
+      background: linear-gradient(180deg, var(--green) 0 14px, var(--wood) 14px);
+      padding: 28px 20px;
+      text-align: center;
+      border-bottom: 4px solid #000;
+    }
+    header p { margin: 6px 0 0; color: #f3e9dc; }
+    .language-selector { margin-top: 12px; display: flex; justify-content: center; }
+    .language-selector select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--text);
+      border: 2px solid var(--stone);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .language-selector select:focus { outline: none; border-color: var(--green-l); }
+    main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
+    #search {
+      flex: 1 1 240px;
+      padding: 11px 14px;
+      background: var(--panel);
+      color: var(--text);
+      border: 2px solid var(--stone);
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    #search:focus { outline: none; border-color: var(--green-l); }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filters button {
+      background: var(--stone);
+      color: var(--text);
+      border: 2px solid #000;
+      border-radius: 6px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .filters button:hover { background: #5c5c5c; }
+    .filters button.active { background: var(--green); border-color: var(--green-l); }
+    #count { color: var(--muted); margin: 4px 0 14px; font-size: .9rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+    .card {
+      background: var(--panel);
+      border: 2px solid var(--stone);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform .15s, border-color .15s;
+    }
+    .card:hover { transform: translateY(-4px); border-color: var(--green-l); }
+    .thumb {
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.6rem;
+      image-rendering: pixelated;
+      background-size: 24px 24px;
+    }
+    .card-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .card h3 { margin: 0; font-size: 1.1rem; }
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag { font-size: .75rem; padding: 3px 8px; border-radius: 4px; background: var(--stone); font-weight: 600; }
+    
+    /* Classes de Dificuldade para todos os idiomas */
+    .diff-facil, .diff-easy, .diff-facile { background: #3d7a28; }
+    .diff-medio, .diff-medium, .diff-moyen { background: #a8741a; }
+    .diff-avancado, .diff-advanced, .diff-avanzado, .diff-avance { background: #9b2b2b; }
+
+    .card p { margin: 0; color: var(--muted); font-size: .9rem; flex: 1; }
+    .src { color: var(--green-l); font-size: .8rem; text-decoration: none; }
+    .src:hover { text-decoration: underline; }
+    .btn {
+      background: var(--green);
+      color: #fff;
+      border: 2px solid #000;
+      border-bottom-width: 4px;
+      border-radius: 6px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: .95rem;
+    }
+    .btn:hover:not(:disabled) { background: var(--green-l); }
+    .btn:disabled { background: var(--stone); color: #888; cursor: not-allowed; }
+    .btn.wood { background: var(--wood); }
+    .btn.wood:hover:not(:disabled) { background: #a96a45; }
+    #empty { text-align: center; padding: 40px; color: var(--muted); border: 2px dashed var(--stone); border-radius: 8px; }
+    .overlay { position: fixed; inset: 0; background: #000b; display: none; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+    .overlay.open { display: flex; }
+    .modal {
+      background: var(--panel);
+      border: 3px solid var(--green);
+      border-radius: 10px;
+      width: 100%;
+      max-width: 640px;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 20px;
+      position: relative;
+    }
+    .modal h2 { margin: 0 36px 6px 0; }
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: var(--wood);
+      color: #fff;
+      border: 2px solid #000;
+      border-radius: 6px;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .modal h4 { margin: 18px 0 8px; color: var(--green-l); }
+    .mats { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+    .mats label { display: flex; gap: 10px; align-items: center; background: var(--bg); padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+    .mats input { width: 18px; height: 18px; accent-color: var(--green); }
+    .mats input:checked + span { text-decoration: line-through; color: var(--muted); }
+    .bar { height: 8px; background: var(--stone); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+    .bar > div { height: 100%; background: var(--green-l); width: 0; transition: width .2s; }
+    .step-box { background: var(--bg); border-left: 5px solid var(--wood); padding: 14px; border-radius: 6px; min-height: 80px; }
+    .step-nav { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 12px; }
+    #step-counter { color: var(--muted); font-weight: 600; }
+  </style>
+</head>
+<body>
+<header>
+  <h1 data-cy="app-title">⛏️ MineCrafting - Tutorial Hub</h1>
+  <p data-cy="app-subtitle">Tutoriais e blueprints de construções de Minecraft, com lista de materiais e passo a passo para o seu Survival.</p>
+  <div class="language-selector">
+    <select id="languageSelect" onchange="mudarIdioma(this.value)" aria-label="Selecionar Idioma">
+      <option value="pt" selected>🇧🇷 Português</option>
+      <option value="en">🇺🇸 English</option>
+      <option value="es">🇪🇸 Español</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="it">🇮🇹 Italiano</option>
+    </select>
+  </div>
+</header>
+<main>
+  <div class="controls">
+    <input id="search" data-cy="search-input" type="search" placeholder="Buscar tutorial por palavra-chave..." aria-label="Buscar tutorial">
+    <div class="filters" data-cy="filter-group">
+      <button class="active" data-cy="filter-category" data-category="Todos">Todos</button>
+      <button data-cy="filter-category" data-category="Casas/Vilas">Casas/Vilas</button>
+      <button data-cy="filter-category" data-category="Castelos/Medievais">Castelos/Medievais</button>
+      <button data-cy="filter-category" data-category="Redstone/Fazendas">Redstone/Fazendas</button>
+    </div>
+  </div>
+  <div id="count" data-cy="results-count"></div>
+  <div class="grid" id="grid" data-cy="tutorial-grid"></div>
+  <div id="empty" data-cy="empty-state" hidden>Nenhum tutorial encontrado. Tente outra palavra ou categoria. 🔍</div>
+</main>
+
+<div class="overlay" id="overlay" data-cy="modal-overlay">
+  <div class="modal" id="modal" data-cy="tutorial-modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
+    <button class="close" data-cy="btn-close-modal" id="btn-close" aria-label="Fechar">✕</button>
+    <h2 id="m-title" data-cy="modal-title"></h2>
+    <div class="tags" id="m-tags"></div>
+    <a class="src" id="m-src" data-cy="modal-source" target="_blank" rel="noopener noreferrer"></a>
+    <h4>🎒 Materiais necessários</h4>
+    <ul class="mats" id="mats" data-cy="materials-list"></ul>
+    <div class="bar"><div id="bar" data-cy="materials-progress"></div></div>
+    <div id="mat-status" data-cy="materials-status" style="font-size:.85rem;color:var(--muted);margin-top:4px"></div>
+    <h4>📋 Passo a passo</h4>
+    <div class="step-box" id="step-text" data-cy="step-text"></div>
+    <div class="step-nav">
+      <button class="btn wood" id="btn-prev" data-cy="btn-prev-step">← Anterior</button>
+      <span id="step-counter" data-cy="step-counter"></span>
+      <button class="btn" id="btn-next" data-cy="btn-next-step">Próximo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ficheiro de Traduções -->
+<script src="translations.js"></script>
+
+<script>
+  // O seu script principal de interatividade continua aqui...
+</script>
+</body>
+</html>
+<style>
+:root{--green:#5b8731;--green-l:#78b043;--wood:#8f5635;--stone:#4a4a4a;--bg:#14161a;--panel:#1f2328;--text:#e8e8e8;--muted:#a0a4aa;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
+header{background:linear-gradient(180deg,var(--green) 0 14px,var(--wood) 14px);padding:28px 20px;text-align:center;border-bottom:4px solid #000}
+header p{margin:6px 0 0;color:#f3e9dc}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 40px}
+.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px}
+#search{flex:1 1 240px;padding:11px 14px;background:var(--panel);color:var(--text);border:2px solid var(--stone);border-radius:6px;font-size:1rem}
+#search:focus{outline:none;border-color:var(--green-l)}
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.filters button{background:var(--stone);color:var(--text);border:2px solid #000;border-radius:6px;padding:9px 14px;cursor:pointer;font-weight:600}
+.filters button:hover{background:#5c5c5c}
+.filters button.active{background:var(--green);border-color:var(--green-l)
+#count{color:var(--muted);margin:4px 0 14px;font-size:.9rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+.card{background:var(--panel);border:2px solid var(--stone);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-4px);border-color:var(--green-l)}
+.thumb{height:130px;display:flex;align-items:center;justify-content:center;font-size:3.6rem;image-rendering:pixelated;background-size:24px 24px}
+.card-body{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card h3{margin:0;font-size:1.1rem}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:.75rem;padding:3px 8px;border-radius:4px;background:var(--stone);font-weight:600}
+.diff-facil{background:#3d7a28}.diff-medio{background:#a8741a}.diff-avancado{background:#9b2b2b}
+.card p{margin:0;color:var(--muted);font-size:.9rem;flex:1}
+.src{color:var(--green-l);font-size:.8rem;text-decoration:none}.src:hover{text-decoration:underline}
+.btn{background:var(--green);color:#fff;border:2px solid #000;border-bottom-width:4px;border-radius:6px;padding:10px 14px;cursor:pointer;font-weight:700;font-size:.95rem}
+.btn:hover:not(:disabled){background:var(--green-l)}
+.btn:disabled{background:var(--stone);color:#888;cursor:not-allowed}
+.btn.wood{background:var(--wood)}.btn.wood:hover:not(:disabled){background:#a96a45}
+#empty{text-align:center;padding:40px;color:var(--muted);border:2px dashed var(--stone);border-radius:8px}
+.overlay{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.overlay.open{display:flex}
+.modal{background:var(--panel);border:3px solid var(--green);border-radius:10px;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;padding:20px;position:relative}
+.modal h2{margin:0 36px 6px 0}
+.close{position:absolute;top:10px;right:12px;background:var(--wood);color:#fff;border:2px solid #000;border-radius:6px;width:34px;height:34px;cursor:pointer;font-size:1rem}
+.modal h4{margin:18px 0 8px;color:var(--green-l)}
+.mats{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.mats label{display:flex;gap:10px;align-items:center;background:var(--bg);padding:8px 10px;border-radius:6px;cursor:pointer}
+.mats input{width:18px;height:18px;accent-color:var(--green)}
+.mats input:checked+span{text-decoration:line-through;color:var(--muted)}
+.bar{height:8px;background:var(--stone);border-radius:4px;overflow:hidden;margin-top:8px}
+.bar>div{height:100%;background:var(--green-l);width:0;transition:width .2s}
+.step-box{background:var(--bg);border-left:5px solid var(--wood);padding:14px;border-radius:6px;min-height:80px}
+.step-nav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
+#step-counter{color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <h1 data-cy="app-title">⛏️ MineCrafting - Tutorial Hub</h1>
+  <p data-cy="app-subtitle">Tutoriais e blueprints de construções de Minecraft, com lista de materiais e passo a passo para o seu Survival.</p>
+</header>
+<main>
+  <div class="controls">
+    <input id="search" data-cy="search-input" type="search" placeholder="Buscar tutorial por palavra-chave..." aria-label="Buscar tutorial">
+    <div class="filters" data-cy="filter-group">
+      <button class="active" data-cy="filter-category" data-category="Todos">Todos</button>
+      <button data-cy="filter-category" data-category="Casas/Vilas">Casas/Vilas</button>
+      <button data-cy="filter-category" data-category="Castelos/Medievais">Castelos/Medievais</button>
+      <button data-cy="filter-category" data-category="Redstone/Fazendas">Redstone/Fazendas</button>
+    </div>
+  </div>
+  <div id="count" data-cy="results-count"></div>
+  <div class="grid" id="grid" data-cy="tutorial-grid"></div>
+  <div id="empty" data-cy="empty-state" hidden>Nenhum tutorial encontrado. Tente outra palavra ou categoria. 🔍</div>
+</main>
+
+<div class="overlay" id="overlay" data-cy="modal-overlay">
+  <div class="modal" id="modal" data-cy="tutorial-modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
+    <button class="close" data-cy="btn-close-modal" id="btn-close" aria-label="Fechar">✕</button>
+    <h2 id="m-title" data-cy="modal-title"></h2>
+    <div class="tags" id="m-tags"></div>
+    <a class="src" id="m-src" data-cy="modal-source" target="_blank" rel="noopener noreferrer"></a>
+    <h4>🎒 Materiais necessários</h4>
+    <ul class="mats" id="mats" data-cy="materials-list"></ul>
+    <div class="bar"><div id="bar" data-cy="materials-progress"></div></div>
+    <div id="mat-status" data-cy="materials-status" style="font-size:.85rem;color:var(--muted);margin-top:4px"></div>
+    <h4>📋 Passo a passo</h4>
+    <div class="step-box" id="step-text" data-cy="step-text"></div>
+    <div class="step-nav">
+      <button class="btn wood" id="btn-prev" data-cy="btn-prev-step">← Anterior</button>
+      <span id="step-counter" data-cy="step-counter"></span>
+      <button class="btn" id="btn-next" data-cy="btn-next-step">Próximo →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TUTORIAIS = [
+  {id:1,titulo:"Micro-abrigo de Sobrevivência",cat:"Casas/Vilas",dif:"Fácil",emoji:"🛖",cor:"#5b8731",fonte:"Minecraft Wiki",url:"https://minecraft.wiki/w/Tutorial:Building_micro_shelters",desc:"Abrigo mínimo para passar a primeira noite sem ser atacado.",
+   mats:["~30x Blocos comuns (terra, pedregulho ou tábuas)","1x Porta","1x Cama","2x Tochas","1x Baú","1x Bancada"],
+   passos:["Escolha uma encosta ou terreno plano e deixe um espaço interno pequeno, de 3x3 blocos.","Feche paredes e teto com blocos comuns, sem deixar aberturas além da porta.","Instale a porta e ilumine o interior com tochas, para que nenhum monstro nasça dentro.","Coloque a cama para pular a noite e definir seu ponto de renascimento.","Adicione baú e bancada e use o abrigo como base até construir uma casa maior."]},
+  {id:2,titulo:"Fazenda de Árvores",cat:"Redstone/Fazendas",dif:"Fácil",emoji:"🌳",cor:"#3d7a28",fonte:"Minecraft Wiki",url:"https://minecraft.wiki/w/Tutorial:Tree_farming",desc:"Plantação organizada de madeira para nunca ficar sem toras.",
+   mats:["8x Mudas de árvore","1x Machado","16x Farinha de osso","4x Tochas","1x Baú","Blocos de terra ou grama"],
+   passos:["Prepare uma área plana de terra ou grama com espaço livre acima de cada muda.","Plante as mudas com distância entre elas; espécies como abeto-escuro ou selva crescem em grupos 2x2.","Use farinha de osso para acelerar o crescimento das árvores.","Colha as toras com o machado e replante as mudas que caírem.","Ilumine a área com tochas para impedir o nascimento de monstros."]},
+  {id:3,titulo:"Castelo Medieval",cat:"Castelos/Medievais",dif:"Avançado",emoji:"🏰",cor:"#4a4a4a",fonte:"minecraft.how",url:"https://minecraft.how/pt/blog/post/minecraft-castle-medieval-building-guide",desc:"Muralhas, torres de canto, ameias e fosso, em pedra variada.",
+   mats:["Pedregulho, tijolos de pedra e deepslate (paleta mista)","Toras e escadas de carvalho-escuro ou abeto","Lajes e escadas para telhados","Tochas, lanternas e correntes","Balde de água (fosso)","Portão: portas, grades ou barras de ferro"],
+   passos:["Planeje o layout no papel e escolha um terreno elevado, de preferência perto de água.","Erga muralhas grossas, de 3 a 4 blocos de largura na base, usando pedras variadas para dar textura.","Construa torres nos cantos, mais altas do que as muralhas.","Crie ameias no topo das muralhas e, se quiser, machicolações com escadas e lajes salientes.","Cubra os telhados com escadas e lajes para formar inclinações, em vez de topos planos.","Monte o portão principal, o pátio e os cômodos internos e ilumine com tochas e lanternas.","Cave o fosso e plante jardins e árvores ao redor para dar contexto."]},
+  {id:4,titulo:"Salão de Troca de Aldeões",cat:"Casas/Vilas",dif:"Médio",emoji:"🧑‍🌾",cor:"#8f5635",fonte:"Minecraft Wiki",url:"https://minecraft.wiki/w/Tutorials/Villager_trading_hall",desc:"Cabines individuais para cada aldeão, com bancada e cama.",
+   mats:["Aldeões (um por cabine)","Estações de trabalho (uma por profissão)","Camas","Alçapões","Vidros ou grades","Blocos de construção","Funis ou carrinhos para transporte"],
+   passos:["Defina o espaço e desenhe uma cabine individual para cada aldeão.","Coloque a estação de trabalho e a cama dentro de cada cabine.","Isole o aldeão com vidros ou alçapões, deixando o jogador ver e conversar com ele.","Transporte os aldeões por carrinhos ou água até as cabines.","Troque a profissão por quebra e recolocação da estação até obter as trocas desejadas."]},
+  {id:5,titulo:"Fazenda de Kelp",cat:"Redstone/Fazendas",dif:"Médio",emoji:"🌊",cor:"#2b6f8f",fonte:"Minecraft Wiki",url:"https://minecraft.wiki/w/Tutorials/Kelp_farming",desc:"Fazenda automática de kelp, útil para combustível e comida.",
+   mats:["Kelp (algas marinhas)","1x Observador","1x Pistão","1x Funil","1x Baú","Blocos de construção","Baldes de água"],
+   passos:["Crie um tanque de água com cerca de 1 bloco de profundidade a mais do que a altura desejada para o kelp.","Plante o kelp no fundo, alinhado ao observador.","Posicione o observador para detectar o crescimento e acionar o pistão.","O pistão quebra o kelp crescido e os itens caem no funil.","Conecte o funil a um baú para coletar tudo."]},
+  {id:6,titulo:"Fazenda de Golens de Ferro",cat:"Redstone/Fazendas",dif:"Avançado",emoji:"🤖",cor:"#8f2b2b",fonte:"Minecraft Wiki",url:"https://minecraft.wiki/w/Tutorial:Door-based_iron_golem_farming",desc:"Fazenda baseada em portas que gera golens de ferro automaticamente.",
+   mats:["Aldeões","Camas","Portas","Funis e baú","Lava, para a câmara de morte","Blocos de construção","Alçapões e vidros"],
+   passos:["Construa a plataforma de nascimento em área aberta, afastada das cabines dos aldeões.","Prenda os aldeões em um espaço fechado, com camas e portas que eles reconheçam como aldeia.","Ajuste a altura e a superfície onde os golens podem nascer, conforme o esquema da wiki.","Leve os golens até a câmara de morte com lava ou queda.","Conecte funis a um baú para coletar o ferro.","As medidas exatas variam por versão: confira o esquema na Minecraft Wiki."]}
+];
+const state={cat:"Todos",q:"",tut:null,step:0,checks:{}};
+const $=s=>document.querySelector(s);
+const norm=t=>t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const diffClass=d=>"diff-"+norm(d);
+
+function renderGrid(){
+  const q=norm(state.q.trim());
+  const list=TUTORIAIS.filter(t=>(state.cat==="Todos"||t.cat===state.cat)&&(!q||norm(t.titulo+" "+t.cat+" "+t.dif+" "+t.desc).includes(q)));
+  $("#grid").innerHTML=list.map(t=>`
+    <article class="card" data-cy="card-tutorial" data-id="${t.id}">
+      <div class="thumb" data-cy="card-image" style="background-color:${t.cor};background-image:linear-gradient(45deg,#0002 25%,transparent 25% 75%,#0002 75%)">${t.emoji}</div>
+      <div class="card-body">
+        <h3 data-cy="card-title">${t.titulo}</h3>
+        <div class="tags"><span class="tag" data-cy="card-category">${t.cat}</span><span class="tag ${diffClass(t.dif)}" data-cy="card-difficulty">${t.dif}</span></div>
+        <p>${t.desc}</p><a class="src" data-cy="card-source" href="${t.url}" target="_blank" rel="noopener noreferrer">Fonte: ${t.fonte} ↗</a>
+        <button class="btn" data-cy="btn-view-steps" data-id="${t.id}">Ver Passo a Passo</button>
+      </div>
+    </article>`).join("");
+  $("#empty").hidden=list.length>0;
+  $("#count").textContent=list.length+(list.length===1?" tutorial encontrado":" tutoriais encontrados");
+}
+
+function renderMaterials(){
+  const t=state.tut,c=state.checks[t.id]||[];
+  $("#mats").innerHTML=t.mats.map((m,i)=>`<li><label><input type="checkbox" data-cy="material-checkbox" data-idx="${i}" ${c[i]?"checked":""}><span>${m}</span></label></li>`).join("");
+  const n=c.filter(Boolean).length;
+  $("#bar").style.width=(n/t.mats.length*100)+"%";
+  $("#mat-status").textContent=n+" de "+t.mats.length+" materiais coletados";
+}
+
+function renderStep(){
+  const t=state.tut,total=t.passos.length;
+  $("#step-text").textContent=(state.step+1)+". "+t.passos[state.step];
+  $("#step-counter").textContent="Passo "+(state.step+1)+" de "+total;
+  $("#btn-prev").disabled=state.step===0;
+  $("#btn-next").disabled=state.step===total-1;
+}
+
+function openModal(id){
+  const t=TUTORIAIS.find(x=>x.id===id);
+  state.tut=t;state.step=0;
+  if(!state.checks[id])state.checks[id]=t.mats.map(()=>false);
+  $("#m-title").textContent=t.emoji+" "+t.titulo;
+  $("#m-tags").innerHTML=`<span class="tag">${t.cat}</span><span class="tag ${diffClass(t.dif)}">${t.dif}</span>`;
+  $("#m-src").href=t.url;$("#m-src").textContent="Ver tutorial original em "+t.fonte+" ↗";
+  renderMaterials();renderStep();
+  $("#overlay").classList.add("open");
+}
+function closeModal(){$("#overlay").classList.remove("open")}
+
+$("#search").addEventListener("input",e=>{state.q=e.target.value;renderGrid()});
+document.querySelectorAll("[data-cy=filter-category]").forEach(b=>b.addEventListener("click",()=>{
+  state.cat=b.dataset.category;
+  document.querySelectorAll("[data-cy=filter-category]").forEach(x=>x.classList.toggle("active",x===b));
+  renderGrid();
+}));
+$("#grid").addEventListener("click",e=>{const b=e.target.closest("[data-cy=btn-view-steps]");if(b)openModal(+b.dataset.id)});
+$("#mats").addEventListener("change",e=>{
+  if(e.target.matches("[data-cy=material-checkbox]")){state.checks[state.tut.id][+e.target.dataset.idx]=e.target.checked;
+  const n=state.checks[state.tut.id].filter(Boolean).length;
+  $("#bar").style.width=(n/state.tut.mats.length*100)+"%";
+  $("#mat-status").textContent=n+" de "+state.tut.mats.length+" materiais coletados";}
+});
+$("#btn-next").addEventListener("click",()=>{if(state.step<state.tut.passos.length-1){state.step++;renderStep()}});
+$("#btn-prev").addEventListener("click",()=>{if(state.step>0){state.step--;renderStep()}});
+$("#btn-close").addEventListener("click",closeModal);
+$("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeModal()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+renderGrid();
+</script>
+</body>
+</html>
