@@ -1,6 +1,6 @@
 const TRANSLATIONS = {
   pt: {
-    appTitle: "⛏️ MineCrafting - Tutorial Hub",
+    appTitle: "⛏️ Celo Craft - Tutorial Hub",
     appSubtitle: "Tutoriais e blueprints de construções de Minecraft, com lista de materiais e passo a passo para o seu Survival.",
     searchPlaceholder: "Buscar tutorial por palavra-chave...",
     categories: {
@@ -141,7 +141,7 @@ const TRANSLATIONS = {
     ]
   },
   en: {
-    appTitle: "⛏️ MineCrafting - Tutorial Hub",
+    appTitle: "⛏️ Celo Craft - Tutorial Hub",
     appSubtitle: "Minecraft building tutorials and blueprints, with material lists and step-by-step guides for your Survival mode.",
     searchPlaceholder: "Search tutorial by keyword...",
     categories: {
@@ -282,7 +282,7 @@ const TRANSLATIONS = {
     ]
   },
   es: {
-    appTitle: "⛏️ MineCrafting - Hub de Tutoriales",
+    appTitle: "⛏️ Celo Craft - Hub de Tutoriales",
     appSubtitle: "Tutoriales y planos de construcción para Minecraft, con listas de materiales y guia paso a paso para tu modo Supervivencia.",
     searchPlaceholder: "Buscar tutorial por palabra clave...",
     categories: {
@@ -422,7 +422,7 @@ const TRANSLATIONS = {
     ]
   },
   fr: {
-    appTitle: "⛏️ MineCrafting - Hub de Tutoriels",
+    appTitle: "⛏️ Celo Craft - Hub de Tutoriels",
     appSubtitle: "Tutoriels et plans de construction Minecraft, avec liste de matériaux et guides étape par étape pour le mode Survie.",
     searchPlaceholder: "Rechercher un tutoriel par mot-clé...",
     categories: {
@@ -562,3 +562,43 @@ const TRANSLATIONS = {
     ]
   }
 }
+
+// Italian shares stable IDs and source URLs, with independently translated content.
+TRANSLATIONS.it = {
+  appTitle: '⛏️ Celo Craft - Hub di Tutorial',
+  appSubtitle: 'Tutorial e progetti di costruzioni Minecraft, con materiali e istruzioni per la modalità Sopravvivenza.',
+  searchPlaceholder: 'Cerca un tutorial per parola chiave...',
+  categories: { Todos: 'Tutti', 'Casas/Vilas': 'Case/Villaggi', 'Castelos/Medievais': 'Castelli/Medievali', 'Redstone/Fazendas': 'Redstone/Fattorie' },
+  resultsCount: n => `${n} ${n === 1 ? 'tutorial trovato' : 'tutorial trovati'}`,
+  emptyState: 'Nessun tutorial trovato. Prova un’altra parola o categoria. 🔍',
+  viewStepsBtn: 'Vedi passo dopo passo', sourceLabel: 'Fonte:',
+  originalTutorialLink: 'Vedi il tutorial originale su ',
+  materialsTitle: '🎒 Materiali necessari', materialsStatus: (n, total) => `${n} di ${total} materiali raccolti`,
+  stepsTitle: '📋 Passo dopo passo', prevBtn: '← Precedente', nextBtn: 'Successivo →',
+  stepCounter: (n, total) => `Passo ${n} di ${total}`,
+  tutoriais: [
+    { titulo: 'Micro-rifugio di Sopravvivenza', dif: 'Facile', desc: 'Un piccolo rifugio per superare la prima notte al sicuro.',
+      mats: ['~30x Blocchi comuni', '1x Porta', '1x Letto', '2x Torce', '1x Cassa', '1x Banco da lavoro'],
+      passos: ['Scegli un terreno e prepara uno spazio interno di 3x3 blocchi.', 'Chiudi pareti e tetto lasciando spazio per la porta.', 'Installa la porta e illumina l’interno con torce.', 'Posiziona il letto per dormire e impostare il punto di rinascita.', 'Aggiungi cassa e banco da lavoro.'] },
+    { titulo: 'Fattoria di Alberi', dif: 'Facile', desc: 'Una piantagione organizzata per avere sempre legname.',
+      mats: ['8x Arbusti', '1x Ascia', '16x Farina d’ossa', '4x Torce', '1x Cassa', 'Blocchi di terra'],
+      passos: ['Prepara una zona piana con spazio libero in alto.', 'Pianta gli arbusti lasciando spazio tra loro.', 'Usa farina d’ossa per accelerare la crescita.', 'Raccogli i tronchi e ripianta gli arbusti.', 'Illumina la zona con torce.'] },
+    { titulo: 'Castello Medievale', dif: 'Avanzato', desc: 'Mura, torri, merli e fossato in pietra.',
+      mats: ['Pietra e mattoni di pietra', 'Tronchi e scale di quercia scura', 'Lastre e scale per tetti', 'Torce e lanterne', 'Secchio d’acqua', 'Sbarre di ferro'],
+      passos: ['Pianifica il castello su un terreno elevato.', 'Costruisci mura spesse da 3 a 4 blocchi.', 'Aggiungi torri agli angoli più alte delle mura.', 'Crea merli sulla sommità delle mura.', 'Copri i tetti con scale inclinate.', 'Installa il portone e illumina l’interno.', 'Scava il fossato attorno al castello.'] },
+    { titulo: 'Sala di Scambio dei Villici', dif: 'Medio', desc: 'Postazioni individuali per commerciare con i villici.',
+      mats: ['Villici', 'Blocchi di lavoro', 'Letti', 'Botole', 'Vetro', 'Blocchi da costruzione', 'Tramogge'],
+      passos: ['Prepara una postazione per ogni villico.', 'Metti un letto e un blocco di lavoro in ogni postazione.', 'Separa i villici con vetro o botole.', 'Trasporta i villici con carrelli o acqua.', 'Cambia professione sostituendo il blocco di lavoro prima di commerciare.'] },
+    { titulo: 'Fattoria di Alghe', dif: 'Medio', desc: 'Una fattoria automatica di alghe per cibo e combustibile.',
+      mats: ['Alghe', '1x Osservatore', '1x Pistone', '1x Tramoggia', '1x Cassa', 'Blocchi', 'Secchi d’acqua'],
+      passos: ['Costruisci una vasca d’acqua abbastanza profonda.', 'Pianta le alghe sul fondo sotto l’osservatore.', 'Collega l’osservatore al pistone.', 'Il pistone taglia le alghe che galleggiano verso la raccolta.', 'Collega la tramoggia a una cassa.'] },
+    { ...TRANSLATIONS.fr.tutoriais[5] }
+  ].map((tutorial, i) => ({ ...TRANSLATIONS.pt.tutoriais[i], ...tutorial }))
+};
+// The final French entry had accidentally been written in Italian.
+Object.assign(TRANSLATIONS.fr.tutoriais[5], {
+  titulo: 'Ferme à Golems de Fer', dif: 'Avancé',
+  desc: 'Ferme automatique pour produire des golems de fer.',
+  mats: ['Villageois', 'Lits', 'Portes', 'Entonnoirs et coffre', 'Lave', 'Blocs de construction', 'Trappes'],
+  passos: ['Construisez une plateforme dans une zone ouverte.', 'Installez les villageois avec les lits et portes du village.', 'Réglez la hauteur de la zone d’apparition.', 'Guidez les golems vers la lave avec des courants d’eau.', 'Récupérez le fer dans un coffre avec les entonnoirs.']
+});

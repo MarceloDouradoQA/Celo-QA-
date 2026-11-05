@@ -1,5 +1,20 @@
 {
+  "name": "celo-craft-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Testes E2E do Celo Craft com Cypress",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node scripts/server.cjs",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test": "start-server-and-test start http://127.0.0.1:8080 cy:run",
+    "test:open": "start-server-and-test start http://127.0.0.1:8080 cy:open"
+  },
   "devDependencies": {
-    "cypress": "^16.2.1"
+    "cypress": "16.2.1",
+    "start-server-and-test": "2.1.3"
   }
 }
