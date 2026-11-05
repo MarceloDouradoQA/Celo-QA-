@@ -48,4 +48,14 @@ describe('Traduções', () => {
     cy.get('#languageSelect').select('it').select('pt');
     cy.getByCy('results-count').should('have.text', '6 tutoriais encontrados');
   });
+  it('ajusta o último passo quando a tradução tem menos etapas', () => {
+    cy.get('[data-cy="btn-view-steps"][data-id="6"]').click();
+    for (let i = 0; i < 5; i++) cy.getByCy('btn-next-step').click();
+    cy.getByCy('step-counter').should('have.text', 'Passo 6 de 6');
+    cy.window().then(win => win.mudarIdioma('it'));
+    cy.getByCy('step-counter').should('have.text', 'Passo 5 di 5');
+    cy.getByCy('step-text').should('not.contain', 'undefined');
+    cy.getByCy('btn-next-step').should('be.disabled');
+  });
+
 });

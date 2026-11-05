@@ -8,7 +8,7 @@ describe('Passo a passo e materiais', () => {
       });
       cy.getByCy('tutorial-modal').should('be.visible');
       cy.getByCy('btn-prev-step').should('be.disabled');
-      const total = id === 3 ? 7 : 5;
+      const total = id === 3 ? 7 : id === 6 ? 6 : 5;
       for (let step = 1; step <= total; step++) {
         cy.getByCy('step-counter').should('have.text', `Passo ${step} de ${total}`);
         cy.getByCy('step-text').should('not.be.empty');

@@ -154,6 +154,11 @@
     .bar > div { height: 100%; background: var(--green-l); width: 0; transition: width .2s; }
     .step-box { background: var(--bg); border-left: 5px solid var(--wood); padding: 14px; border-radius: 6px; min-height: 80px; }
     .step-nav { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 12px; }
+    @media (max-width: 480px) {
+      .step-nav { flex-wrap: wrap; }
+      #step-counter { flex: 1 0 100%; text-align: center; order: -1; }
+      #search { min-width: 0; }
+    }
     #step-counter { color: var(--muted); font-weight: 600; }
   </style>
 </head>
@@ -324,7 +329,7 @@
     if (!tut) return;
 
     state.tutId = id;
-    if (resetStep) state.step = 0;
+    state.step = resetStep ? 0 : Math.min(state.step, tut.passos.length - 1);
     if (!state.checks[id]) state.checks[id] = tut.mats.map(() => false);
 
     const catLabel = tObj.categories[tut.cat] || tut.cat;

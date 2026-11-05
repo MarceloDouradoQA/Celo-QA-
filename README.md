@@ -21,13 +21,13 @@ npm run test:open
 
 Para usar apenas o site: `npm start`, depois abra http://127.0.0.1:8080. Se a porta 8080 estiver ocupada, encerre o processo anterior antes de iniciar os testes. Em Linux, instale as dependências de sistema exigidas pelo Cypress, incluindo Xvfb.
 
-## Cobertura: 27 cenários
+## Cobertura: 28 cenários
 
 | Arquivo | Cenários | Cobertura |
 | --- | ---: | --- |
 | `catalog.cy.js` | 7 | Carregamento, fontes, três categorias, busca normalizada, combinação de filtros, vazio e entrada literal |
 | `modal.cy.js` | 8 | Seis tutoriais, limites e retorno dos passos, fechamento, materiais e isolamento entre tutoriais |
-| `languages.cy.js` | 8 | Cinco idiomas, busca traduzida, conservação do estado e regressão francês/italiano |
+| `languages.cy.js` | 9 | Cinco idiomas, busca traduzida, conservação do estado e regressão francês/italiano |
 | `responsive.cy.js` | 4 | Fluxo em 320, 390, 768 e 1440 pixels, sem transbordamento horizontal |
 
 Os testes usam seletores `data-cy`, isolamento por cenário e assertions com repetição automática do Cypress. Não ignoram exceções da aplicação nem usam esperas fixas. A navegação externa das fontes não é testada: os testes verificam os atributos dos links sem depender de sites de terceiros.
