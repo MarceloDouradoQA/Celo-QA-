@@ -1,0 +1,117 @@
+{
+  "info": {
+    "name": "Loja QA Lab | API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Catálogo e contrato",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/products"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Contrato do catálogo', () => {",
+              "  pm.response.to.have.jsonSchema({ type: 'array', minItems: 1, items: { type: 'object', required: ['id', 'name', 'priceCents', 'stock'], properties: { id: { type: 'string' }, name: { type: 'string' }, priceCents: { type: 'integer', minimum: 0 }, stock: { type: 'integer', minimum: 0 } } } });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Criação e total do pedido",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/orders",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"productId\": \"mouse\", \"quantity\": 1}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "pm.test('Pedido e total corretos', () => {",
+              "  const order = pm.response.json();",
+              "  pm.expect(order.id).to.match(/^\\d+$/);",
+              "  pm.expect(order).to.include({ productId: 'mouse', quantity: 1, totalCents: 7990 });",
+              "  pm.collectionVariables.set('orderId', order.id);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consulta do pedido criado",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/orders/{{orderId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Mesmo ID retornado pela criação', () => pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get('orderId')));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quantidade acima do estoque",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/orders",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"productId\": \"mouse\", \"quantity\": 99}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+              "pm.test('Erro de estoque', () => pm.expect(pm.response.json().code).to.eql('INSUFFICIENT_STOCK'));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+name: Portfólio QA
+on:
+  push:
+    paths: ['qa-automation-portfolio/**', '.github/workflows/qa-automation-portfolio.yml']
+  pull_request:
+    paths: ['qa-automation-portfolio/**', '.github/workflows/qa-automation-portfolio.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: qa-automation-portfolio
+
+jobs:
+  suites:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [playwright, cypress, postman, selenium, pytest, sql, k6]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: qa-automation-portfolio/package-lock.json
+      - name: Instalar dependências JavaScript
+        if: contains(fromJSON('["playwright","cypress","postman"]'), matrix.suite)
+        run: npm ci
+        env:
+          CYPRESS_INSTALL_BINARY: '0'
+      - name: Playwright
+        if: matrix.suite == 'playwright'
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:playwright
+      - name: Cypress
+        if: matrix.suite == 'cypress'
+        run: |
+          npx cypress install
+          npm run test:cypress
+      - name: Postman / Newman
+        if: matrix.suite == 'postman'
+        run: npm run test:postman
+      - uses: actions/setup-java@v4
+        if: matrix.suite == 'selenium'
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - uses: actions/setup-python@v5
+        if: matrix.suite == 'pytest' || matrix.suite == 'sql'
+        with:
+          python-version: '3.12'
+      - uses: grafana/setup-k6-action@v1
+        if: matrix.suite == 'k6'
+        with:
+          k6-version: '1.5.0'
+      - name: Subir a loja de teste
+        if: matrix.suite == 'selenium' || matrix.suite == 'pytest' || matrix.suite == 'k6'
+        run: |
+          mkdir -p artifacts
+          node lab/server.mjs > artifacts/lab.log 2>&1 &
+          curl --fail --retry 10 --retry-connrefused --retry-delay 1 http://127.0.0.1:3000/api/products
+      - name: Selenium / Java
+        if: matrix.suite == 'selenium'
+        run: mvn -B -f projects/selenium-java/pom.xml test
+      - name: pytest
+        if: matrix.suite == 'pytest'
+        run: |
+          python -m pip install -r projects/pytest-api/requirements.txt
+          python -m pytest projects/pytest-api --junitxml=artifacts/pytest.xml
+      - name: SQL
+        if: matrix.suite == 'sql'
+        run: npm run test:sql
+      - name: k6
+        if: matrix.suite == 'k6'
+        run: k6 run --summary-export artifacts/k6.json projects/k6-performance/catalog.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-${{ matrix.suite }}
+          path: |
+            qa-automation-portfolio/artifacts/
+            qa-automation-portfolio/test-results/
+            qa-automation-portfolio/projects/selenium-java/target/surefire-reports/
+          if-no-files-found: ignore

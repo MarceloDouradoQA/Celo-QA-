@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loja QA Lab</title>
+<style>
+body { font: 1rem system-ui; margin: 3rem auto; max-width: 36rem; padding: 0 1rem; color: #172337; background: #eef3f8; }
+main { padding: 2rem; background: white; border-radius: 1rem; }
+label, select, input, button { display: block; margin: .6rem 0; font: inherit; }
+button { background: #144aa0; color: white; border: 0; padding: .7rem 1rem; border-radius: .4rem; }
+</style>
+<main>
+  <h1>Loja QA Lab</h1>
+  <form>
+    <label for="product">Produto</label>
+    <select id="product" required></select>
+    <label for="quantity">Quantidade</label>
+    <input id="quantity" type="number" min="1" step="1" value="1" required>
+    <button type="submit" disabled>Finalizar pedido</button>
+  </form>
+  <p role="status"></p>
+</main>
+<script type="module">
+const form = document.querySelector('form');
+const product = document.querySelector('#product');
+const quantity = document.querySelector('#quantity');
+const button = form.querySelector('button');
+const status = document.querySelector('[role=status]');
+try {
+  const response = await fetch('/api/products');
+  if (!response.ok) throw new Error('catalog unavailable');
+  for (const item of await response.json()) product.add(new Option(item.name, item.id));
+  button.disabled = false;
+} catch {
+  status.textContent = 'Não foi possível carregar o catálogo.';
+}
+form.addEventListener('submit', async event => {
+  event.preventDefault();
+  button.disabled = true;
+  try {
+    const response = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: product.value, quantity: quantity.valueAsNumber }),
+    });
+    const data = await response.json();
+    if (response.ok) {
+      const total = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data.totalCents / 100);
+      status.textContent = `Pedido #${data.id} confirmado. Total: ${total}`;
+    } else {
+      status.textContent = data.code === 'INSUFFICIENT_STOCK' ? 'Estoque insuficiente.' : 'Não foi possível finalizar o pedido.';
+    }
+  } catch {
+    status.textContent = 'Falha de conexão. Tente novamente.';
+  } finally {
+    button.disabled = false;
+  }
+});
+</script>
+</html>
