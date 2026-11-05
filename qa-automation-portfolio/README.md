@@ -59,4 +59,6 @@ O [workflow](../.github/workflows/qa-automation-portfolio.yml) separa as sete su
 | Cypress | A instalação do binário recebeu um arquivo ZIP inválido |
 | Selenium / Java | A resolução de dependências do Maven falhou por DNS |
 
-O workflow está configurado para executar todas as suítes após o primeiro push. A execução no GitHub Actions ainda precisa ser verificada.
+## Verificação no GitHub Actions
+
+As sete suítes passaram no [GitHub Actions](https://github.com/MarceloDouradoQA/Celo-QA-/actions/runs/42044737298), incluindo Playwright, Cypress e Selenium.
